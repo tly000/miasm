@@ -1519,8 +1519,6 @@ class DelDummyPhi(object):
             else:
                 if src.is_mem() or (src.is_op() and src.op.startswith("call")):
                     if src in equivalence_graph.nodes():
-                        print("BAD %s" % src)
-                        fds
                         return None
                 equivalence_graph.add_uniq_edge(src, dst)
                 equivalence.add(src)
@@ -1549,7 +1547,6 @@ class DelDummyPhi(object):
                     node = todo.pop()
                     if node in done:
                         continue
-                    print(node)
                     known.add(node)
                     is_ok = True
                     for parent in equivalence_graph.predecessors(node):
@@ -1560,7 +1557,7 @@ class DelDummyPhi(object):
                         continue
                     if node.is_op("Phi"):
                         successors = equivalence_graph.successors(node)
-                        assert len(successors) == 1
+                        # assert len(successors) == 1
                         phi_node = successors.pop()
                         return set([phi_node]), phi_node, head, equivalence_graph
                     done.add(node)
