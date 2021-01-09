@@ -1918,6 +1918,7 @@ class State(object):
                 if dst in src:
                     return True
                 if dst.is_mem() and src.is_mem():
+                    return True
                     base1, offset1 = get_expr_base_offset(dst.ptr)
                     base2, offset2 = get_expr_base_offset(src.ptr)
                     if base1 != base2:
