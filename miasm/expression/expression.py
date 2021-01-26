@@ -27,8 +27,7 @@
 #  - ExprSlice
 #  - ExprCompose
 #
-
-
+import re
 from builtins import zip
 from builtins import range
 import warnings
@@ -1219,7 +1218,7 @@ class ExprOp(Expr):
                     "FLAG_ADDWC_CF", "FLAG_ADDWC_OF",
                     "FLAG_SUBWC_CF", "FLAG_SUBWC_OF",
 
-            ]:
+            ] and not re.fullmatch("call_func[A-Za-z_]*[0-9]+", op):
                 raise ValueError(
                     "sanitycheck: ExprOp args must have same size! %s" %
                     ([(str(arg), arg.size) for arg in args]))
@@ -1269,7 +1268,10 @@ class ExprOp(Expr):
         elif self._op in ['segm']:
             size = self._args[1].size
         else:
-            if None in sizes:
+            match = re.fullmatch("call_func[A-Za-z_]*([0-9]+)", op)
+            if match:
+                size = int(match.group(1))
+            elif None in sizes:
                 size = None
             else:
                 # All arguments have the same size
