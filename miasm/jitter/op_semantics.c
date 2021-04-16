@@ -460,7 +460,7 @@ uint32_t fpu_fadd32(uint32_t a, uint32_t b)
 	c_cast.flt = a_cast.flt + b_cast.flt;
 #ifdef DEBUG_MIASM_DOUBLE
 	dump_float();
-	printf("%e + %e -> %e\n", a, b, c_cast.flt);
+	printf("%e + %e -> %e\n", a_cast.flt, b_cast.flt, c_cast.flt);
 #endif
 	return c_cast.u32;
 }
@@ -475,7 +475,7 @@ uint64_t fpu_fadd64(uint64_t a, uint64_t b)
 	c_cast.dbl = a_cast.dbl + b_cast.dbl;
 #ifdef DEBUG_MIASM_DOUBLE
 	dump_float();
-	printf("%e + %e -> %e\n", a, b, c_cast.dbl);
+	printf("%e + %e -> %e\n", a_cast.dbl, b_cast.dbl, c_cast.dbl);
 #endif
 	return c_cast.u64;
 }
@@ -490,7 +490,7 @@ uint32_t fpu_fsub32(uint32_t a, uint32_t b)
 	c_cast.flt = a_cast.flt - b_cast.flt;
 #ifdef DEBUG_MIASM_DOUBLE
 	dump_float();
-	printf("%e + %e -> %e\n", a, b, c_cast.flt);
+	printf("%e + %e -> %e\n", a_cast.flt, b_cast.flt, c_cast.flt);
 #endif
 	return c_cast.u32;
 }
@@ -505,7 +505,7 @@ uint64_t fpu_fsub64(uint64_t a, uint64_t b)
 	c_cast.dbl = a_cast.dbl - b_cast.dbl;
 #ifdef DEBUG_MIASM_DOUBLE
 	dump_float();
-	printf("%e + %e -> %e\n", a, b, c_cast.dbl);
+	printf("%e + %e -> %e\n", a_cast.dbl, b_cast.dbl, c_cast.dbl);
 #endif
 	return c_cast.u64;
 }
@@ -520,7 +520,7 @@ uint32_t fpu_fmul32(uint32_t a, uint32_t b)
 	c_cast.flt = a_cast.flt * b_cast.flt;
 #ifdef DEBUG_MIASM_DOUBLE
 	dump_float();
-	printf("%e * %e -> %e\n", a, b, c_cast.flt);
+	printf("%e * %e -> %e\n", a_cast.flt, b_cast.flt, c_cast.flt);
 #endif
 	return c_cast.u32;
 }
@@ -535,7 +535,7 @@ uint64_t fpu_fmul64(uint64_t a, uint64_t b)
 	c_cast.dbl = a_cast.dbl * b_cast.dbl;
 #ifdef DEBUG_MIASM_DOUBLE
 	dump_float();
-	printf("%e * %e -> %e\n", a, b, c_cast.dbl);
+	printf("%e * %e -> %e\n", a_cast.dbl, b_cast.dbl, c_cast.dbl);
 #endif
 	return c_cast.u64;
 }
@@ -550,7 +550,7 @@ uint32_t fpu_fdiv32(uint32_t a, uint32_t b)
 	c_cast.flt = a_cast.flt / b_cast.flt;
 #ifdef DEBUG_MIASM_DOUBLE
 	dump_float();
-	printf("%e * %e -> %e\n", a, b, c_cast.flt);
+	printf("%e * %e -> %e\n", a_cast.flt, b_cast.flt, c_cast.flt);
 #endif
 	return c_cast.u32;
 }
@@ -565,78 +565,85 @@ uint64_t fpu_fdiv64(uint64_t a, uint64_t b)
 	c_cast.dbl = a_cast.dbl / b_cast.dbl;
 #ifdef DEBUG_MIASM_DOUBLE
 	dump_float();
-	printf("%e * %e -> %e\n", a, b, c_cast.dbl);
+	printf("%e * %e -> %e\n", a_cast.dbl, b_cast.dbl, c_cast.dbl);
 #endif
 	return c_cast.u64;
 }
 
-double fpu_ftan(double a)
+uint64_t fpu_ftan(uint64_t a)
 {
-	double b;
-	b = tan(a);
+    double_uint64_t a_cast, b_cast;
+    a_cast.u64 = a;
+	b_cast.dbl = tan(a_cast.dbl);
 #ifdef DEBUG_MIASM_DOUBLE
 	dump_float();
-	printf("%e tan %e\n", a, b);
+	printf("%e tan %e\n", a_cast.dbl, b_cast.dbl);
 #endif
-	return b;
+	return b_cast.u64;
 }
 
-double fpu_frndint(double a)
+uint64_t fpu_frndint(uint64_t a)
 {
+    double_uint64_t a_cast, c_cast;
+    a_cast.u64 = a;
 	int64_t b;
-	double c;
-	b = (int64_t)a;
-	c = (double)b;
+	b = (int64_t)a_cast.dbl;
+    c_cast.dbl = (double)b;
 #ifdef DEBUG_MIASM_DOUBLE
 	dump_float();
-	printf("%e double %e\n", a, c);
+	printf("%e double %e\n", a_cast.dbl, c_cast.dbl);
 #endif
-	return c;
+	return c_cast.u64;
 }
 
-double fpu_fsin(double a)
+uint64_t fpu_fsin(uint64_t a)
 {
-	double b;
-	b = sin(a);
+    double_uint64_t a_cast, b_cast;
+    a_cast.u64 = a;
+    b_cast.dbl = sin(a_cast.dbl);
 #ifdef DEBUG_MIASM_DOUBLE
 	dump_float();
-	printf("%e sin %e\n", a, b);
+	printf("%e sin %e\n", a_cast.dbl, b_cast.dbl);
 #endif
-	return b;
+	return b_cast.u64;
 }
 
-double fpu_fcos(double a)
+uint64_t fpu_fcos(uint64_t a)
 {
-	double b;
-	b = cos(a);
+    double_uint64_t a_cast, b_cast;
+    a_cast.u64 = a;
+    b_cast.dbl = cos(a_cast.dbl);
 #ifdef DEBUG_MIASM_DOUBLE
 	dump_float();
-	printf("%e cos %e\n", a, b);
+	printf("%e cos %e\n", a_cast.dbl, b_cast.dbl);
 #endif
-	return b;
+	return b_cast.u64;
 }
 
 
-double fpu_fscale(double a, double b)
+uint64_t fpu_fscale(uint64_t a, uint64_t b)
 {
-	double c;
-	c = a * exp2(trunc(b));
+    double_uint64_t a_cast, b_cast, c_cast;
+    a_cast.u64 = a;
+    b_cast.u64 = b;
+    c_cast.dbl = a_cast.dbl * exp2(trunc(b_cast.dbl));
 #ifdef DEBUG_MIASM_DOUBLE
 	dump_float();
-	printf("%e *exp2 %e -> %e\n", a, b, c);
+	printf("%e *exp2 %e -> %e\n", a_cast.dbl, b_cast.dbl, c_cast.dbl);
 #endif
-	return c;
+	return c_cast.u64;
 }
 
-double fpu_f2xm1(double a)
+uint64_t fpu_f2xm1(uint64_t a)
 {
-	double b;
-	b = exp2(a)-1;
+    double_uint64_t a_cast, b_cast;
+    a_cast.u64 = a;
+	b_cast.dbl = exp2(a_cast.dbl)-1;
 #ifdef DEBUG_MIASM_DOUBLE
 	dump_float();
-	printf("%e exp2 -1 %e\n", a, b);
+	printf("%e exp2 -1 %e\n", a_cast.dbl, b_cast.dbl);
 #endif
-	return b;
+	return b_cast.u64;
 }
 
 uint32_t fpu_fsqrt32(uint32_t a)
@@ -646,7 +653,7 @@ uint32_t fpu_fsqrt32(uint32_t a)
 	a_cast.flt = sqrtf(a_cast.flt);
 #ifdef DEBUG_MIASM_DOUBLE
 	dump_float();
-	printf("%e sqrt %e\n", a, a_cast.flt);
+	printf("%e sqrt %e\n", a_cast.flt, a_cast.flt);
 #endif
 	return a_cast.u32;
 }
@@ -659,7 +666,7 @@ uint64_t fpu_fsqrt64(uint64_t a)
 	a_cast.dbl = sqrt(a_cast.dbl);
 #ifdef DEBUG_MIASM_DOUBLE
 	dump_float();
-	printf("%e sqrt %e\n", a, a_cast.dbl);
+	printf("%e sqrt %e\n", a_cast.dbl, a_cast.dbl);
 #endif
 	return a_cast.u64;
 }
@@ -672,7 +679,7 @@ uint64_t fpu_fabs64(uint64_t a)
 	a_cast.dbl = fabs(a_cast.dbl);
 #ifdef DEBUG_MIASM_DOUBLE
 	dump_float();
-	printf("%e abs %e\n", a, a_cast.dbl);
+	printf("%e abs %e\n", a_cast.dbl, a_cast.dbl);
 #endif
 	return a_cast.u64;
 }
@@ -687,66 +694,81 @@ uint64_t fpu_fprem64(uint64_t a, uint64_t b)
 	c_cast.dbl = fmod(a_cast.dbl, b_cast.dbl);
 #ifdef DEBUG_MIASM_DOUBLE
 	dump_float();
-	printf("%e %% %e -> %e\n", a, b, c);
+	printf("%e %% %e -> %e\n", a_cast.dbl, b_cast.dbl, c_cast.dbl);
 #endif
 	return c_cast.u64;
 }
 
-double fpu_fchs(double a)
+uint64_t fpu_fchs64(uint64_t a)
 {
-	double b;
-	b = -a;
+    double_uint64_t a_cast, b_cast;
+    a_cast.u64 = a;
+    b_cast.dbl = -a_cast.dbl;
 #ifdef DEBUG_MIASM_DOUBLE
 	dump_float();
-	printf(" - %e -> %e\n", a, b);
+	printf(" - %e -> %e\n", a_cast.dbl, b_cast.dbl);
 #endif
-	return b;
+	return b_cast.u64;
 }
 
-double fpu_fyl2x(double a, double b)
+uint64_t fpu_fyl2x(uint64_t a, uint64_t b)
 {
-	double c;
-	c = b * (log(a) / log(2));
+    double_uint64_t a_cast, b_cast, c_cast;
+    a_cast.u64 = a;
+    b_cast.u64 = b;
+    c_cast.dbl = b_cast.dbl * (log(a_cast.dbl) / log(2));
 #ifdef DEBUG_MIASM_DOUBLE
 	dump_float();
-	printf("%e * log(%e) -> %e\n", b, a, c);
+	printf("%e * log(%e) -> %e\n", b_cast.dbl, a_cast.dbl, c_cast.dbl);
 #endif
-	return c;
+	return c_cast.u64;
 }
 
-double fpu_fpatan(double a, double b)
+uint64_t fpu_fpatan(uint64_t a, uint64_t b)
 {
-	double c;
-	c = atan2(b, a);
+    double_uint64_t a_cast, b_cast, c_cast;
+    a_cast.u64 = a;
+    b_cast.u64 = b;
+    c_cast.dbl = atan(b_cast.dbl / a_cast.dbl);
 #ifdef DEBUG_MIASM_DOUBLE
 	dump_float();
-	printf("arctan(%e / %e) -> %e\n", b, a, c);
+	printf("arctan(%e / %e) -> %e\n", b_cast.dbl, a_cast.dbl, c_cast.dbl);
 #endif
-	return c;
+	return c_cast.u64;
 }
 
-unsigned int fpu_fcom_c0(double a, double b)
+unsigned int fpu_fcom_c0(uint64_t a, uint64_t b)
 {
-	if (isnan(a) || isnan(b))
+    double_uint64_t a_cast, b_cast;
+    a_cast.u64 = a;
+    b_cast.u64 = b;
+
+	if (isnan(a_cast.dbl) || isnan(b_cast.dbl))
 		return 1;
 	if (a>=b)
 		return 0;
 	return 1;
 }
-unsigned int fpu_fcom_c1(double a, double b)
+unsigned int fpu_fcom_c1(uint64_t a, uint64_t b)
 {
 	//XXX
 	return 0;
 }
-unsigned int fpu_fcom_c2(double a, double b)
+unsigned int fpu_fcom_c2(uint64_t a, uint64_t b)
 {
-	if (isnan(a) || isnan(b))
+    double_uint64_t a_cast, b_cast;
+    a_cast.u64 = a;
+    b_cast.u64 = b;
+	if (isnan(a_cast.dbl) || isnan(b_cast.dbl))
 		return 1;
 	return 0;
 }
-unsigned int fpu_fcom_c3(double a, double b)
+unsigned int fpu_fcom_c3(uint64_t a, uint64_t b)
 {
-	if (isnan(a) || isnan(b))
+    double_uint64_t a_cast, b_cast;
+    a_cast.u64 = a;
+    b_cast.u64 = b;
+	if (isnan(a_cast.dbl) || isnan(b_cast.dbl))
 		return 1;
 	if (a==b)
 		return 1;
