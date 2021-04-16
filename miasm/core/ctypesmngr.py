@@ -126,7 +126,7 @@ class CTypePtr(CTypeBase):
         return not self.__eq__(other)
 
     def __str__(self):
-        return "<Ptr:%s>" % str(self.target)
+        return "<Ptr:%s>" % str(self.target.name if isinstance(self.target, CTypeStruct) else self.target)
 
 
 class CTypeStruct(CTypeBase):
