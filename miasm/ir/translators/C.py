@@ -250,11 +250,11 @@ class TranslatorC(Translator):
                             dest_size
                         ))
                 return "%s(%s)" % (func, self.from_expr(expr.args[0]))
-            elif expr.op.startswith("fpconvert_fp"):
+            elif expr.op.startswith("fpconvert_fp") or expr.op == "fp80_to_fp64" or expr.op == "fp64_to_fp80":
                 dest_size = expr.size
                 arg_size = expr.args[0].size
                 if (arg_size, dest_size) in [
-                        (32, 64), (64, 32)
+                        (32, 64), (64, 32), (80, 64), (64, 80)
                 ]:
                     func = "fp%d_to_fp%d" % (arg_size, dest_size)
                 else:

@@ -1246,6 +1246,10 @@ class ExprOp(Expr):
             size = 1
         elif self._op.startswith("fp_to_sint"):
             size = int(self._op[len("fp_to_sint"):])
+        elif self._op == "fp80_to_fp64":
+            size = 64
+        elif self._op == "fp64_to_fp80":
+            size = 80
         elif self._op.startswith("fpconvert_fp"):
             size = int(self._op[len("fpconvert_fp"):])
         elif self._op in [

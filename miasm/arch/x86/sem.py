@@ -2392,7 +2392,7 @@ def fld(_, instr, src):
     if src.size == 32:
         src = m2_expr.ExprOp("fpconvert_fp64", src)
     if isinstance(src, m2_expr.ExprMem) and src.size > 64:
-        raise NotImplementedError('convert from 80bits')
+        src = m2_expr.ExprOp("fp80_to_fp64", src)
 
     e = []
     e.append(m2_expr.ExprAssign(float_st7, float_st6))
@@ -2435,6 +2435,8 @@ def fstp(ir, instr, dst):
         src = float_st0
         if dst.size == 32:
             src = m2_expr.ExprOp("fpconvert_fp32", src)
+        elif dst.size == 80:
+            src = m2_expr.ExprOp("fp64_to_fp80", src)
         e.append(m2_expr.ExprAssign(dst, src))
     else:
         src = float_st0
