@@ -2352,8 +2352,8 @@ def comiss(_, instr, dst, src):
 
     e = []
 
-    dst = m2_expr.ExprOp('sint_to_fp', dst[:32])
-    src = m2_expr.ExprOp('sint_to_fp', src[:32])
+    dst = m2_expr.ExprOp("fpconvert_fp64", dst)
+    src =  m2_expr.ExprOp("fpconvert_fp64", src)
 
     e.append(m2_expr.ExprAssign(cf, m2_expr.ExprOp('fcom_c0', dst, src)))
     e.append(m2_expr.ExprAssign(pf, m2_expr.ExprOp('fcom_c2', dst, src)))
@@ -2372,8 +2372,8 @@ def comisd(_, instr, dst, src):
 
     e = []
 
-    dst = m2_expr.ExprOp('sint_to_fp', dst[:64])
-    src = m2_expr.ExprOp('sint_to_fp', src[:64])
+    dst = dst[:64]
+    src = src[:64]
 
     e.append(m2_expr.ExprAssign(cf, m2_expr.ExprOp('fcom_c0', dst, src)))
     e.append(m2_expr.ExprAssign(pf, m2_expr.ExprOp('fcom_c2', dst, src)))
@@ -2427,9 +2427,6 @@ def fst(_, instr, dst):
 
 def fstp(ir, instr, dst):
     e = []
-
-    if isinstance(dst, m2_expr.ExprMem) and dst.size > 64:
-        raise NotImplementedError('convert to 80bits')
 
     if isinstance(dst, m2_expr.ExprMem):
         src = float_st0
@@ -4298,11 +4295,11 @@ def _cvtt_tpl(dst, src, numbers, double):
             tmp_src = src[i*32:i*32 + 32]
 
         e.append(m2_expr.ExprAssign(
-            dst[i*32:i*32 + 32],
+            dst if len(numbers) == 1 else dst[i*32:i*32 + 32],
             m2_expr.ExprOp('fp_to_sint32', m2_expr.ExprOp(
                 'fpround_towardszero',
                 tmp_src
-            ))))
+            )).zeroExtend(dst.size if len(numbers) == 1 else 32)))
     return e
 
 def cvttpd2pi(_, instr, dst, src):
@@ -4343,11 +4340,11 @@ def movss(_, instr, dst, src):
 def ucomiss(_, instr, src1, src2):
     e = []
     e.append(m2_expr.ExprAssign(zf, m2_expr.ExprOp(
-        'ucomiss_zf', src1[:32], src2[:32])))
+        'fcom_c3', m2_expr.ExprOp("fpconvert_fp64",src1[:32]), m2_expr.ExprOp("fpconvert_fp64",src2[:32]))))
     e.append(m2_expr.ExprAssign(pf, m2_expr.ExprOp(
-        'ucomiss_pf', src1[:32], src2[:32])))
+        'fcom_c2', m2_expr.ExprOp("fpconvert_fp64",src1[:32]), m2_expr.ExprOp("fpconvert_fp64",src2[:32]))))
     e.append(m2_expr.ExprAssign(cf, m2_expr.ExprOp(
-        'ucomiss_cf', src1[:32], src2[:32])))
+        'fcom_c0', m2_expr.ExprOp("fpconvert_fp64",src1[:32]), m2_expr.ExprOp("fpconvert_fp64",src2[:32]))))
 
     e.append(m2_expr.ExprAssign(of, m2_expr.ExprInt(0, 1)))
     e.append(m2_expr.ExprAssign(af, m2_expr.ExprInt(0, 1)))
@@ -4358,11 +4355,11 @@ def ucomiss(_, instr, src1, src2):
 def ucomisd(_, instr, src1, src2):
     e = []
     e.append(m2_expr.ExprAssign(zf, m2_expr.ExprOp(
-        'ucomisd_zf', src1[:64], src2[:64])))
+        'fcom_c3', src1[:64], src2[:64])))
     e.append(m2_expr.ExprAssign(pf, m2_expr.ExprOp(
-        'ucomisd_pf', src1[:64], src2[:64])))
+        'fcom_c2', src1[:64], src2[:64])))
     e.append(m2_expr.ExprAssign(cf, m2_expr.ExprOp(
-        'ucomisd_cf', src1[:64], src2[:64])))
+        'fcom_c0', src1[:64], src2[:64])))
 
     e.append(m2_expr.ExprAssign(of, m2_expr.ExprInt(0, 1)))
     e.append(m2_expr.ExprAssign(af, m2_expr.ExprInt(0, 1)))
