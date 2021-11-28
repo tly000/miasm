@@ -323,10 +323,14 @@ def mem2double(instr, arg):
     @arg: argument to transform
     """
     if isinstance(arg, m2_expr.ExprMem):
-        if arg.size > 64:
-            # TODO: move to 80 bits
-            arg = m2_expr.ExprMem(expraddr(instr.mode, arg.ptr), size=64)
-        return m2_expr.ExprOp('sint_to_fp', arg.signExtend(64))
+        if arg.size == 80:
+            return m2_expr.ExprOp('fp80_to_fp64', arg)
+        elif arg.size == 64:
+            return arg
+        elif arg.size == 32:
+            return m2_expr.ExprOp('fpconvert_fp64', arg)
+        else:
+            raise RuntimeError("invalid mem2double arg size")
     else:
         return arg
 
@@ -2496,19 +2500,13 @@ def fld1(ir, instr):
 def fldl2t(ir, instr):
     value_f = math.log(10) / math.log(2)
     value = struct.unpack('Q', struct.pack('d', value_f))[0]
-    return fld(ir, instr, m2_expr.ExprOp(
-        'sint_to_fp',
-        m2_expr.ExprInt(value, 64)
-    ))
+    return fld(ir, instr, m2_expr.ExprInt(value, 64))
 
 
 def fldpi(ir, instr):
     value_f = math.pi
     value = struct.unpack('Q', struct.pack('d', value_f))[0]
-    return fld(ir, instr, m2_expr.ExprOp(
-        'sint_to_fp',
-        m2_expr.ExprInt(value, 64)
-    ))
+    return fld(ir, instr, m2_expr.ExprInt(value, 64))
 
 
 def fldln2(ir, instr):
