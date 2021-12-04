@@ -173,24 +173,46 @@ class ExceptionHandle(object):
         return not self.__eq__(to_cmp)
 
 
+class JitterException(Exception):
+
+    "Raised when any unhandled exception occurs (in jitter.vm or jitter.cpu)"
+
+    def __init__(self, exception_flag):
+        super(JitterException, self).__init__()
+        self.exception_flag = exception_flag
+
+    def __str__(self):
+        return "A jitter exception occurred: %s (0x%x)" % (
+            self.exception_flag_to_str(), self.exception_flag
+        )
+
+    def exception_flag_to_str(self):
+        exception_flag_list = []
+        for name, value in JitterExceptions.items():
+            if value & self.exception_flag == value:
+                exception_flag_list.append(name)
+        return ' & '.join(exception_flag_list)
+
+
 class Jitter(object):
 
     "Main class for JIT handling"
 
     C_Gen = CGen
 
-    def __init__(self, ir_arch, jit_type="gcc"):
+    def __init__(self, lifter, jit_type="gcc"):
         """Init an instance of jitter.
-        @ir_arch: ir instance for this architecture
+        @lifter: Lifter instance for this architecture
         @jit_type: JiT backend to use. Available options are:
             - "gcc"
             - "llvm"
             - "python"
         """
 
-        self.arch = ir_arch.arch
-        self.attrib = ir_arch.attrib
-        arch_name = ir_arch.arch.name  # (ir_arch.arch.name, ir_arch.attrib)
+        self.arch = lifter.arch
+        self.attrib = lifter.attrib
+        arch_name = lifter.arch.name  # (lifter.arch.name, lifter.attrib)
+        self.running = False
 
         try:
             if arch_name == "x86":
@@ -199,7 +221,7 @@ class Jitter(object):
                 from miasm.jitter.arch import JitCore_arm as jcore
             elif arch_name == "armt":
                 from miasm.jitter.arch import JitCore_arm as jcore
-                ir_arch.arch.name = 'arm'
+                lifter.arch.name = 'arm'
             elif arch_name == "aarch64":
                 from miasm.jitter.arch import JitCore_aarch64 as jcore
             elif arch_name == "msp430":
@@ -217,12 +239,12 @@ class Jitter(object):
 
         self.vm = VmMngr.Vm()
         self.cpu = jcore.JitCpu()
-        self.ir_arch = ir_arch
+        self.lifter = lifter
         self.bs = bin_stream_vm(self.vm)
-        self.ircfg = self.ir_arch.new_ircfg()
+        self.ircfg = self.lifter.new_ircfg()
 
         self.symbexec = EmulatedSymbExec(
-            self.cpu, self.vm, self.ir_arch, {}
+            self.cpu, self.vm, self.lifter, {}
         )
         self.symbexec.reset_regs()
 
@@ -238,9 +260,9 @@ class Jitter(object):
         except ImportError:
             raise RuntimeError('Unsupported jitter: %s' % jit_type)
 
-        self.jit = JitCore(self.ir_arch, self.bs)
+        self.jit = JitCore(self.lifter, self.bs)
         if isinstance(self.jit, JitCore_Cc_Base):
-            self.jit.init_codegen(self.C_Gen(self.ir_arch))
+            self.jit.init_codegen(self.C_Gen(self.lifter))
         elif jit_type == "python":
             self.jit.set_cpu_vm(self.cpu, self.vm)
 
@@ -374,7 +396,9 @@ class Jitter(object):
             return
 
         # Exceptions should never be activated before run
-        assert(self.get_exception() == 0)
+        exception_flag = self.get_exception()
+        if exception_flag:
+            raise JitterException(exception_flag)
 
         # Run the block at PC
         self.pc = self.run_at(self.pc)
@@ -395,7 +419,7 @@ class Jitter(object):
         """
         self.run_iterator = self.runiter_once(pc)
         self.pc = pc
-        self.run = True
+        self.running = True
 
     def continue_run(self, step=False, trace=False):
         """PRE: init_run.
@@ -407,7 +431,7 @@ class Jitter(object):
 
         if trace:
             self.set_trace_log()
-        while self.run:
+        while self.running:
             try:
                 return next(self.run_iterator)
             except StopIteration:
@@ -498,7 +522,7 @@ class Jitter(object):
             log.debug('%r', fname)
             raise ValueError('unknown api', hex(jitter.pc), repr(fname))
         ret = func(jitter)
-        jitter.pc = getattr(jitter.cpu, jitter.ir_arch.pc.name)
+        jitter.pc = getattr(jitter.cpu, jitter.lifter.pc.name)
 
         # Don't break on a None return
         if ret is None:

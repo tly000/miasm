@@ -574,24 +574,7 @@ class IRAOutRegs(IRATest):
         return set(viewvalues(out))
 
 
-
-def add_out_reg_end(ir_arch_a, ircfg_a):
-    # Add dummy dependency to uncover out regs affectation
-    for loc in ircfg_a.leaves():
-        irblock = ircfg_a.blocks.get(loc)
-        if irblock is None:
-            continue
-        regs = {}
-        for reg in ir_arch_a.get_out_regs(irblock):
-            regs[reg] = reg
-        assignblks = list(irblock)
-        new_assiblk = AssignBlock(regs, assignblks[-1].instr)
-        assignblks.append(new_assiblk)
-        new_irblock = IRBlock(loc_db, irblock.loc_key, assignblks)
-        ircfg_a.blocks[loc] = new_irblock
-
-
-ir_arch_a = IRAOutRegs(loc_db)
+lifter = IRAOutRegs(loc_db)
 
 
 class CustomIRCFGSimplifierSSA(IRCFGSimplifierSSA):
@@ -631,7 +614,7 @@ for test_nb, ircfg in enumerate(
 
     # SSA
     head = LBL0
-    simplifier = CustomIRCFGSimplifierSSA(ir_arch_a)
+    simplifier = CustomIRCFGSimplifierSSA(lifter)
     ircfg = simplifier(ircfg, head)
     open('final_%d.dot' % test_nb, 'w').write(ircfg.dot())
 
