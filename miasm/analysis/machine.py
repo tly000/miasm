@@ -1,6 +1,33 @@
 #-*- coding:utf-8 -*-
 import warnings
 
+def make_thumb_selector(machine, cls_a, cls_b):
+    class AutoSelector(object):
+        __slots__ = ["_obj_a", "_obj_b", "_thumb_enabled", "__weakref__"]
+        def __init__(self, *args, **kwargs):
+            object.__setattr__(self, "_obj_a", cls_a(*args, **kwargs))
+            object.__setattr__(self, "_obj_b", cls_b(*args, **kwargs))
+            object.__setattr__(self, "_thumb_enabled", False)
+
+        #
+        # proxying (special cases)
+        #
+        def __getattribute__(self, name):
+            return getattr(object.__getattribute__(self, "_obj_a" if machine.thumb_mode else "_obj_b"), name)
+        def __delattr__(self, name):
+            delattr(object.__getattribute__(self, "_obj_a" if machine.thumb_mode else "_obj_b"), name)
+        def __setattr__(self, name, value):
+            setattr(object.__getattribute__(self, "_obj_a" if machine.thumb_mode else "_obj_b"), name, value)
+
+        def __nonzero__(self):
+            return bool(object.__getattribute__(self, "_obj_a" if machine.thumb_mode else "_obj_b"))
+        def __str__(self):
+            return str(object.__getattribute__(self, "_obj_a" if machine.thumb_mode else "_obj_b"))
+        def __repr__(self):
+            return repr(object.__getattribute__(self, "_obj_a" if machine.thumb_mode else "_obj_b"))
+
+    return AutoSelector
+
 
 class Machine(object):
     """Abstract machine architecture to restrict architecture dependent code"""
@@ -40,6 +67,21 @@ class Machine(object):
             mn = arch.mn_arm
             from miasm.arch.arm.lifter_model_call import LifterModelCallArml as lifter_model_call
             from miasm.arch.arm.sem import Lifter_Arml as lifter
+        elif machine_name == "arml*":
+            from miasm.arch.arm.disasm import dis_arml, dis_armtl
+            dis_engine = make_thumb_selector(self, dis_armtl, dis_arml)
+            from miasm.arch.arm import arch
+            try:
+                from miasm.arch.arm import jit
+                jitter = make_thumb_selector(self, jit.jitter_armtl, jit.jitter_arml)
+            except ImportError:
+                pass
+            mn = make_thumb_selector(self, arch.mn_armt, arch.mn_arm)
+            from miasm.arch.arm.lifter_model_call import LifterModelCallArml, LifterModelCallArmtl
+            lifter_model_call = make_thumb_selector(self, LifterModelCallArmtl, LifterModelCallArml)
+            from miasm.arch.arm.sem import Lifter_Arml, Lifter_Armtl
+            lifter = make_thumb_selector(self, Lifter_Armtl, Lifter_Arml)
+            self.thumb_mode = False
         elif machine_name == "armb":
             from miasm.arch.arm.disasm import dis_armb as dis_engine
             from miasm.arch.arm import arch

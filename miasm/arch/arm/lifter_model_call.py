@@ -47,7 +47,7 @@ class LifterModelCallArml(LifterModelCallArmlBase):
 
 
         cond = instr.additional_info.cond
-        if cond == 14: # COND_ALWAYS:
+        if cond == 14 or cond == 15: # COND_ALWAYS:
             return [call_assignblk], []
 
         # Call is a conditional instruction
