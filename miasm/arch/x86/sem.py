@@ -2097,7 +2097,7 @@ def float_prev(flt, popcount=1):
     i = float_list.index(flt)
     if i < popcount:
         # Drop value (ex: FSTP ST(0))
-        return None
+        return flt
     flt = float_list[i - popcount]
     return flt
 
@@ -5742,6 +5742,8 @@ mnemo_func = {'mov': mov,
               "endbr32": endbr32,
               "fxsave": fxsave,
               "fxrstor": fxrstor,
+              "fnsave": fxsave,
+              "frstor": fxrstor,
               }
 
 
